@@ -1,4 +1,4 @@
-# Maharlika — GCash-style e-wallet demo (Expo SDK 57)
+# Maharlika — Mobile e-wallet demo (Expo SDK 57)
 
 Demo app with a mocked backend. No real money moves. Balances, PIN, and session are local-only.
 
@@ -57,3 +57,11 @@ Expo Go is best-effort only (native modules need a dev build).
 - The **main Maharlika store** (`src/store.jsx`) is also offline-first: balance, transactions, linked accounts, and preferences hydrate from the `app_state` table on launch and write through on every change. Seeds apply first-run only. Nothing in the app resets on restart anymore.
 - Screens: `src/screens/HomeScreen.js`, `SendScreen.js`, `HistoryScreen.js`, routed at `/lab`, `/lab/send`, `/lab/history` (Expo Router equivalents of the lab's native-stack App.js). Entry: Profile → About → "Lab 05 · Offline Wallet (SQLite)".
 - Test offline durability: 1) open `/lab`, note balance; 2) Send ₱100 to anyone; 3) History → confirm the row; 4) enable Airplane Mode; 5) fully kill the app and relaunch; 6) balance and rows must be intact. Long-press a history row to test DELETE.
+
+---
+
+## Author
+
+**Johnroi Umbokan**
+Laboratory Exercise 05: Offline-First Persistence & CRUD with Expo SQLite
+Email: roiumbokan@gmail.com
