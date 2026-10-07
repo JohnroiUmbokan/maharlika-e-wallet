@@ -1,0 +1,12 @@
+Starting project at C:\Users\user\Documents\Default Project\my-app
+Using src/app as the root directory for Expo Router.
+Starting Metro Bundler
+
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8081
+
+Logs for your project will appear below.
+Android Bundled 66618ms node_modules\expo-router\entry.js (2356 modules)
+Android Bundled 190275ms node_modules\expo-router\entry.js (1383 modules)
+Android Bundled 15783ms node_modules\expo-router\entry.js (1 module)
+Android Bundled 19411ms node_modules\expo-router\entry.js (1 module)
