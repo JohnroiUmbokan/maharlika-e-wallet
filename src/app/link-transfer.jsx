@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { IOSStatusBar } from '../components/IOSStatusBar';
-import { BillerAvatar, BottomNav, Label, ScreenHeader } from '../components/ui';
+import { BillerAvatar, Label, ScreenHeader } from '../components/ui';
 import { colors, fonts } from '../theme';
 import { formatPeso, useStore } from '../store';
 
@@ -29,7 +29,6 @@ export default function LinkTransfer() {
             <Text style={styles.ctaText}>Go Back</Text>
           </Pressable>
         </View>
-        <BottomNav active="wallet" />
       </View>
     );
   }
@@ -92,7 +91,6 @@ export default function LinkTransfer() {
           <Text style={styles.ctaText}>Transfer</Text>
         </Pressable>
       </ScrollView>
-      <BottomNav active="wallet" />
     </View>
   );
 }

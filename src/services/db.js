@@ -54,17 +54,9 @@ export function initDatabase() {
     );
   `);
 
-  // Seed exactly once: only when the ledger is completely empty (first launch).
-  const countRow = db.getFirstSync('SELECT COUNT(*) AS count FROM transactions;');
-  const seeded = countRow.count === 0;
-  if (seeded) {
-    db.runSync(
-      'INSERT INTO transactions (type, amount, recipient, timestamp) VALUES (?, ?, ?, ?);',
-      ['Cash-in', 5000, 'Initial Balance', new Date().toISOString()],
-    );
-  }
+  // No auto-seed — start with empty transaction history for clean demo.
   checkpoint();
-  return { seeded, rows: getTransactionCount() };
+  return { seeded: false, rows: getTransactionCount() };
 }
 
 function getTransactionCount() {

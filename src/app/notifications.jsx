@@ -1,24 +1,19 @@
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IOSStatusBar } from '../components/IOSStatusBar';
 import { ModalSheet, ScreenHeader, SearchBar } from '../components/ui';
 import { SwipeableNotifRow } from '../components/SwipeableNotifRow';
+import { useStore } from '../store';
 import { colors, fonts } from '../theme';
 
-const ITEMS = [
-  { id: 'nb1', icon: 'zap', title: 'Bill reminder', body: 'Meralco bill of ₱1,298.00 is due Oct 15.', when: '2h ago', unread: true, detail: 'Pay early from the Pay Bills tab to keep your account in good standing. You can add your own bill there, too.' },
-  { id: 'nb2', icon: 'arrow-down-left', title: 'Cash in received', body: '₱500.00 was added via Partner Store.', when: 'Yesterday', unread: true, detail: 'Your Maharlika balance was updated. Find it under Wallet Management.' },
-  { id: 'nb3', icon: 'send', title: 'Transfer sent', body: '₱500.00 to Maria Santos.', when: 'Oct 04', unread: false, detail: 'This transfer was completed and recorded in your recent activity.' },
-  { id: 'nb4', icon: 'gift', title: 'Promo available', body: '₱50 cashback on your next bill.', when: 'Oct 02', unread: false, detail: 'Cashback is applied automatically at Pay Bills. Demo offer only.' },
-];
-
 export default function Notifications() {
-  const [items, setItems] = useState(ITEMS);
+  const { notifications, markNotificationRead, readAllNotifications, deleteNotification, clearAllNotifications } = useStore();
   const [open, setOpen] = useState(null);
   const [search, setSearch] = useState('');
 
+  const items = notifications ?? [];
   const filtered = items.filter((n) =>
     `${n.title} ${n.body}`.toLowerCase().includes(search.trim().toLowerCase()),
   );
@@ -26,7 +21,7 @@ export default function Notifications() {
   const openItem = (id) => {
     const item = items.find((x) => x.id === id);
     if (!item) return;
-    setItems((prev) => prev.map((x) => (x.id === id ? { ...x, unread: false } : x)));
+    markNotificationRead(id);
     setOpen(item);
   };
 
@@ -35,11 +30,9 @@ export default function Notifications() {
     if (!item) return;
     Alert.alert('Delete Notification', `Delete "${item.title}"? This cannot be undone.`, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => setItems((prev) => prev.filter((x) => x.id !== id)) },
+      { text: 'Delete', style: 'destructive', onPress: () => deleteNotification(id) },
     ]);
   };
-
-  const readAll = () => setItems((prev) => prev.map((x) => ({ ...x, unread: false })));
 
   return (
     <View style={styles.safe}>
@@ -53,15 +46,32 @@ export default function Notifications() {
           <Text style={styles.countLabel}>
             {items.length} notification{items.length === 1 ? '' : 's'}
           </Text>
-          <Text
-            style={[styles.readAllBtn, items.every((x) => !x.unread) && styles.readAllDisabled]}
-            onPress={readAll}
-            suppressHighlighting
-            accessibilityRole="button"
-            accessibilityLabel="Mark all as read"
-          >
-            Mark all read
-          </Text>
+          <View style={styles.btnRow}>
+            <Text
+              style={[styles.readAllBtn, items.every((x) => !x.unread) && styles.readAllDisabled]}
+              onPress={readAllNotifications}
+              suppressHighlighting
+              accessibilityRole="button"
+              accessibilityLabel="Mark all as read"
+            >
+              Mark all read
+            </Text>
+            {items.length > 0 && (
+              <Pressable
+                style={styles.clearAllBtn}
+                onPress={() =>
+                  Alert.alert('Clear All', 'Delete all notifications? This cannot be undone.', [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Clear All', style: 'destructive', onPress: clearAllNotifications },
+                  ])
+                }
+                accessibilityRole="button"
+                accessibilityLabel="Clear all notifications"
+              >
+                <Text style={styles.clearAllText}>Clear all</Text>
+              </Pressable>
+            )}
+          </View>
         </View>
         {filtered.length === 0 && (
           <View style={styles.card}>
@@ -69,7 +79,7 @@ export default function Notifications() {
             <View style={{ flex: 1 }}>
               <Text style={styles.title}>{items.length === 0 ? 'All caught up' : 'No matches'}</Text>
               <Text style={styles.body}>
-                {items.length === 0 ? 'No notifications right now.' : 'Try a different search term.'}
+                {items.length === 0 ? 'Transfers, cash ins, bills and promos will appear here.' : 'Try a different search term.'}
               </Text>
             </View>
           </View>
@@ -109,4 +119,7 @@ const styles = StyleSheet.create({
   body: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted, marginTop: 2 },
   hint: { fontFamily: fonts.regular, fontSize: 12, color: colors.muted, textAlign: 'center' },
   detailBody: { fontFamily: fonts.regular, fontSize: 14, color: colors.ink, lineHeight: 20 },
+  btnRow: { flexDirection: 'row', gap: 8 },
+  clearAllBtn: { backgroundColor: '#FEE2E2', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
+  clearAllText: { fontFamily: fonts.semiBold, fontSize: 13, color: '#EF4444' },
 });

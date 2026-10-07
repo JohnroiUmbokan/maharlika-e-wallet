@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { IOSStatusBar } from '../components/IOSStatusBar';
-import { BillerAvatar, BottomNav, ZigZag } from '../components/ui';
+import { BillerAvatar, ZigZag } from '../components/ui';
 import { colors, fonts } from '../theme';
 import { formatPeso } from '../store';
 import { maskAccount } from '../utils/money';
@@ -106,7 +106,6 @@ export default function Receipt() {
           <Text style={styles.ctaText}>Share Receipt</Text>
         </Pressable>
       </ScrollView>
-      <BottomNav active="bills" />
     </View>
   );
 }

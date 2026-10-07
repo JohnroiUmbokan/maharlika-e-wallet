@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import QRCode from 'react-native-qrcode-svg';
 import { IOSStatusBar } from '../components/IOSStatusBar';
-import { BottomNav, Label, PrimaryButton, QuickChips, ScreenHeader } from '../components/ui';
+import { Label, PrimaryButton, QuickChips, ScreenHeader } from '../components/ui';
 import { colors, fonts } from '../theme';
 import { toCentavos } from '../utils/money';
 import { useStore } from '../store';
@@ -91,7 +91,6 @@ export default function GenerateQR() {
           </>
         )}
       </ScrollView>
-      <BottomNav active="wallet" />
     </View>
   );
 }

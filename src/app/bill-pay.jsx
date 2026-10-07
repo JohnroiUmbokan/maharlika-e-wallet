@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { IOSStatusBar } from '../components/IOSStatusBar';
-import { BillerAvatar, BottomNav, Label, ModalSheet, PrimaryButton, ScreenHeader } from '../components/ui';
+import { BillerAvatar, Label, ModalSheet, PrimaryButton, ScreenHeader } from '../components/ui';
 import { colors, fonts } from '../theme';
 import { formatPeso, useStore } from '../store';
 import { toCentavos, validateBillPayment } from '../utils/money';
@@ -79,7 +79,6 @@ export default function BillPay() {
           <Text style={styles.noteText}>Review your details before paying.</Text>
         </View>
       </ScrollView>
-      <BottomNav active="bills" />
 
       <ModalSheet visible={picking} onClose={() => setPicking(false)} title="Choose Biller">
         {billers.map((b) => (

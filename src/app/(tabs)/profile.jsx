@@ -1,6 +1,6 @@
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useState } from 'react';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { IOSStatusBar } from '../../components/IOSStatusBar';
@@ -11,7 +11,6 @@ import { LIMITS, useStore } from '../../store';
 
 const MENU = [
   { key: 'account', label: 'My Account', icon: 'credit-card' },
-  { key: 'personal', label: 'Personal Info', icon: 'user' },
   { key: 'security', label: 'Security / Device Management', icon: 'shield' },
   { key: 'limits', label: 'Limits', icon: 'pie-chart' },
   { key: 'notifications', label: 'Notifications / Push', icon: 'bell' },
@@ -28,16 +27,27 @@ function LimitBar({ used, max }) {
 }
 
 export default function Profile() {
-  const { user, pushEnabled, setPushEnabled, resetDemoData, security, setSecurityFlag } = useStore();
+  const { user, pushEnabled, setPushEnabled, resetDemoData, security, setSecurityFlag, updateProfile } = useStore();
   const [sheet, setSheet] = useState(null);
+  const [editProfile, setEditProfile] = useState(null);
 
   const press = (key) => {
     if (key === 'logout') return router.push('/modals/logout');
     if (key === 'account') return router.push('/account');
+    if (key === 'editProfile') {
+      setEditProfile({ name: user.name, email: user.email, phone: user.phone });
+      return;
+    }
     setSheet(key);
   };
 
   const peso = (n) => `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`;
+
+  const saveProfile = () => {
+    updateProfile(editProfile);
+    setEditProfile(null);
+    Alert.alert('Saved', 'Profile updated successfully.');
+  };
 
   return (
     <View style={p.safe}>
@@ -55,9 +65,14 @@ export default function Profile() {
       </SafeAreaView>
       <ScrollView style={p.scroll} contentContainerStyle={p.sheet} showsVerticalScrollIndicator={false}>
         <View style={p.identity}>
-          <Image source={require('../../../assets/profile-photo.png')} style={p.photo} />
-          <Text style={p.name}>{user.name}</Text>
-          <Text style={p.phone}>{user.phone}</Text>
+          <Pressable onPress={() => setEditProfile({ name: user.name, email: user.email, phone: user.phone })} style={p.photoWrapper}>
+            <Image source={editProfile?.photo ? { uri: editProfile.photo } : require('../../../assets/profile-photo.png')} style={p.photo} />
+            <View style={p.editOverlay}>
+              <Feather name="camera" size={20} color="#FFFFFF" />
+            </View>
+          </Pressable>
+          <Text style={p.name}>{editProfile?.name || user.name}</Text>
+          <Text style={p.phone}>{editProfile?.phone || user.phone}</Text>
           <View style={p.badge}>
             <Feather name="check-circle" size={14} color="#16A34A" />
             <Text style={p.badgeText}>Verified</Text>
@@ -67,11 +82,7 @@ export default function Profile() {
           {MENU.map((m, i) => (
             <Pressable key={m.key} style={[p.item, i < MENU.length - 1 && p.divider]} onPress={() => press(m.key)}>
               <View style={[p.iconTile, m.danger && { backgroundColor: '#FDECEC' }]}>
-                {m.key === 'limits'
-                  ? <MaterialCommunityIcons name="gauge" size={18} color={colors.primary} />
-                  : m.key === 'personal'
-                    ? <MaterialCommunityIcons name="account-outline" size={18} color={colors.primary} />
-                    : <Feather name={m.icon} size={18} color={m.danger ? '#EF4444' : colors.primary} />}
+                <Feather name={m.icon} size={18} color={m.danger ? '#EF4444' : colors.primary} />
               </View>
               <Text style={[p.itemLabel, m.danger && { color: '#EF4444' }]}>{m.label}</Text>
               {m.key === 'notifications' && !pushEnabled && <View style={p.offDot} />}
@@ -80,17 +91,6 @@ export default function Profile() {
           ))}
         </View>
       </ScrollView>
-
-      <ModalSheet visible={sheet === 'personal'} onClose={() => setSheet(null)} title="Personal Info">
-        <Row k="Full name" v={user.name} />
-        <Row k="Mobile" v={user.phone} />
-        <Row k="Email" v={user.email} />
-        <Row k="Account ID" v={user.id} />
-        <Row k="Status" v="Verified" />
-        <Pressable style={p.boardBtn} onPress={() => { setSheet(null); router.push('/account'); }} accessibilityRole="button" accessibilityLabel="Edit personal info">
-          <Text style={p.boardText}>Edit in Account Interface</Text>
-        </Pressable>
-      </ModalSheet>
 
       <ModalSheet visible={sheet === 'security'} onClose={() => setSheet(null)} title="Security / Device Management">
         <View style={p.pushRow}>
@@ -158,6 +158,22 @@ export default function Profile() {
           <Text style={p.boardText}>Reset demo data</Text>
         </Pressable>
       </ModalSheet>
+
+      <ModalSheet visible={!!editProfile} onClose={() => setEditProfile(null)} title="Edit Profile">
+        <View style={p.editForm}>
+          <TextInput style={p.input} placeholder="Full Name" value={editProfile?.name || ''} onChangeText={(t) => setEditProfile((prev) => ({ ...prev, name: t }))} />
+          <TextInput style={p.input} placeholder="Email" value={editProfile?.email || ''} onChangeText={(t) => setEditProfile((prev) => ({ ...prev, email: t }))} />
+          <TextInput style={p.input} placeholder="Mobile" value={editProfile?.phone || ''} onChangeText={(t) => setEditProfile((prev) => ({ ...prev, phone: t }))} keyboardType="phone-pad" />
+          <View style={p.modalBtns}>
+            <Pressable style={p.cancelBtn} onPress={() => setEditProfile(null)} accessibilityRole="button">
+              <Text style={p.cancelText}>Cancel</Text>
+            </Pressable>
+            <Pressable style={p.saveBtn} onPress={saveProfile} accessibilityRole="button">
+              <Text style={p.saveText}>Save</Text>
+            </Pressable>
+          </View>
+        </View>
+      </ModalSheet>
     </View>
   );
 }
@@ -199,4 +215,13 @@ const p = StyleSheet.create({
   fill: { height: 8, borderRadius: 4, backgroundColor: colors.primary },
   boardBtn: { height: 56, borderRadius: 28, backgroundColor: '#CFE4F0', alignItems: 'center', justifyContent: 'center' },
   boardText: { fontFamily: fonts.semiBold, fontSize: 15, color: colors.primary },
+  photoWrapper: { position: 'relative' },
+  editOverlay: { position: 'absolute', bottom: 0, right: 0, backgroundColor: colors.primary, borderRadius: 16, width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  editForm: { gap: 12 },
+  input: { borderWidth: 1, borderColor: '#CBD5E1', borderRadius: 8, padding: 12, fontSize: 15, backgroundColor: '#FFF', color: colors.ink, marginBottom: 8 },
+  modalBtns: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 8 },
+  cancelBtn: { paddingVertical: 10, paddingHorizontal: 16 },
+  cancelText: { fontWeight: 'bold', color: '#64748B' },
+  saveBtn: { backgroundColor: '#006199', borderRadius: 6, paddingVertical: 10, paddingHorizontal: 20 },
+  saveText: { fontWeight: 'bold', color: '#FFF' },
 });

@@ -7,7 +7,7 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import * as Haptics from 'expo-haptics';
 import { IOSStatusBar } from '../components/IOSStatusBar';
 import { MLogo } from '../components/MLogo';
-import { BottomNav, ScreenHeader, ZigZag } from '../components/ui';
+import { ScreenHeader, ZigZag } from '../components/ui';
 import { colors, fonts } from '../theme';
 import { formatPeso, useStore } from '../store';
 import { TRANSFER_FEE_CENTAVOS } from '../utils/money';
@@ -95,7 +95,6 @@ export default function ConfirmTransfer() {
         )}
         <Text style={styles.note}>Centavos math · fee {formatPeso(fee)} · biometric or PIN required</Text>
       </ScrollView>
-      <BottomNav active="home" />
     </View>
   );
 }

@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { IOSStatusBar } from '../components/IOSStatusBar';
-import { BottomNav, Label, PrimaryButton, QuickChips, ScreenHeader } from '../components/ui';
+import { Label, PrimaryButton, QuickChips, ScreenHeader } from '../components/ui';
 import { colors, fonts } from '../theme';
 import { formatPeso, useStore } from '../store';
 import { toCentavos, validateTransfer } from '../utils/money';
@@ -66,7 +66,6 @@ export default function Send() {
           <Text style={styles.secureText}>Secure transfers, made for every day.</Text>
         </View>
       </ScrollView>
-      <BottomNav active="home" />
     </View>
   );
 }

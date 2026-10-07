@@ -2,7 +2,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { IOSStatusBar } from '../components/IOSStatusBar';
-import { BottomNav, ScreenHeader } from '../components/ui';
+import { ScreenHeader } from '../components/ui';
 import { colors, fonts } from '../theme';
 
 const PROMOS = [
@@ -33,7 +33,6 @@ export default function Promos() {
         ))}
         <Text style={styles.hint}>Demo promos only · no real offers apply.</Text>
       </ScrollView>
-      <BottomNav active="home" />
     </View>
   );
 }

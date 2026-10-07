@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { getAppState, initDatabase, saveAppState, getTransactions, addTransactionToDb, deleteTransactionFromDb } from './services/db';
+import { getAppState, initDatabase, saveAppState, getTransactions, addTransactionToDb, deleteTransactionFromDb, db } from './services/db';
 
 const WalletContext = createContext(null);
 
@@ -34,7 +34,7 @@ export function StoreProvider({ children }) {
     }
   });
   const [balance, setBalance] = useState(
-    typeof snapshot?.balance === 'number' ? snapshot.balance : 10000,
+    typeof snapshot?.balance === 'number' ? snapshot.balance : 0,
   );
   const [transactions, setTransactions] = useState(() => {
     try {
@@ -69,10 +69,12 @@ export function StoreProvider({ children }) {
     Array.isArray(snapshot?.notifications) ? snapshot.notifications : [],
   );
 
-  const addNotification = (title, body) => {
+  const addNotification = (title, body, icon = 'bell') => {
     setToast(`${title}: ${body}`);
+    const now = new Date();
+    const when = now.toLocaleString('en-PH', { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
     setNotifications((prev) => [
-      { id: `n${Date.now()}`, title, body, when: 'Just now', unread: true, detail: body },
+      { id: `n${Date.now()}`, title, body, when, unread: true, detail: body, icon },
       ...prev,
     ].slice(0, 20));
   };
@@ -87,6 +89,10 @@ export function StoreProvider({ children }) {
 
   const deleteNotification = (id) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
   };
 
   const [toast, setToast] = useState(null);
@@ -127,10 +133,17 @@ export function StoreProvider({ children }) {
   };
 
   const resetDemoData = () => {
-    setBalance(10000);
+    setBalance(0);
     setTransactions([]);
     setLinked(seedLinked);
     setProfile(null);
+    // Clear SQLite transactions table
+    try {
+      initDatabase();
+      db.runSync('DELETE FROM transactions;');
+    } catch {
+      // ignore
+    }
   };
 
   const sendMoney = (recipient, amount, message) => {
@@ -143,7 +156,7 @@ export function StoreProvider({ children }) {
       kind: 'sent',
       icon: 'send',
     });
-    addNotification('Transfer sent', `You sent ₱${amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })} to ${recipient}.`);
+    addNotification('Transfer sent', `You sent ₱${amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })} to ${recipient}.`, 'send');
     return true;
   };
 
@@ -158,7 +171,7 @@ export function StoreProvider({ children }) {
       kind: 'bills',
       icon: 'zap',
     });
-    addNotification('Bill paid', `${biller.name} payment of ₱${amt.toLocaleString('en-PH', { minimumFractionDigits: 2 })} was successful.`);
+    addNotification('Bill paid', `${biller.name} payment of ₱${amt.toLocaleString('en-PH', { minimumFractionDigits: 2 })} was successful.`, 'zap');
     return true;
   };
 
@@ -171,7 +184,7 @@ export function StoreProvider({ children }) {
       kind: 'received',
       icon: 'arrow-down-left',
     });
-    addNotification('Cash in received', `₱${amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })} was added via ${place}.`);
+    addNotification('Cash in received', `₱${amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })} was added via ${place}.`, 'arrow-down-left');
   };
 
   const cashOut = (amount, place = 'Partner Store') => {
@@ -184,7 +197,7 @@ export function StoreProvider({ children }) {
       kind: 'sent',
       icon: 'arrow-up-right',
     });
-    addNotification('Cash out recorded', `₱${amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })} was withdrawn via ${place}.`);
+    addNotification('Cash out recorded', `₱${amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })} was withdrawn via ${place}.`, 'arrow-up-right');
     return true;
   };
 
@@ -208,7 +221,7 @@ export function StoreProvider({ children }) {
   };
 
   const value = useMemo(
-    () => ({ balance, transactions, linked, billers, user, pushEnabled, hidden, setPushEnabled, setHidden, security, setSecurityFlag, notifications, addNotification, markNotificationRead, readAllNotifications, deleteNotification, toast, clearToast, sendMoney, payBiller, topUp, cashOut, adjustBalance, adjustLinkedBalance, updateProfile, addTransaction, addLinked, addBiller, deleteTransaction, resetDemoData }),
+    () => ({ balance, transactions, linked, billers, user, pushEnabled, hidden, setPushEnabled, setHidden, security, setSecurityFlag, notifications, addNotification, markNotificationRead, readAllNotifications, deleteNotification, clearAllNotifications, toast, clearToast, sendMoney, payBiller, topUp, cashOut, adjustBalance, adjustLinkedBalance, updateProfile, addTransaction, addLinked, addBiller, deleteTransaction, resetDemoData }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [balance, transactions, linked, billers, user, pushEnabled, hidden, security, notifications, toast],
   );

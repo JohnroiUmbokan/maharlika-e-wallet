@@ -3,6 +3,7 @@ import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View 
 import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import * as SecureStore from 'expo-secure-store';
 import { IOSStatusBar } from '../components/IOSStatusBar';
 import { BottomNav, Label } from '../components/ui';
@@ -20,7 +21,7 @@ function formatPH(digits) {
 
 export default function Account() {
   const { user, updateProfile } = useStore();
-  const [editing, setEditing] = useState(null); // 'name' | 'email' | null
+  const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [numMsg, setNumMsg] = useState('');
@@ -29,6 +30,26 @@ export default function Account() {
   const [confirm, setConfirm] = useState('');
   const [pwMsg, setPwMsg] = useState('');
   const [showPw, setShowPw] = useState(false);
+  const [photo, setPhoto] = useState(null);
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setPhoto(result.assets[0].uri);
+    }
+  };
+
+  const savePhoto = () => {
+    if (photo) {
+      updateProfile({ photo });
+      Alert.alert('Saved', 'Profile photo updated.');
+    }
+  };
 
   const startEdit = (key, current) => {
     setEditing(key);
@@ -102,7 +123,17 @@ export default function Account() {
       </SafeAreaView>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.sheet} showsVerticalScrollIndicator={false}>
         <View style={styles.profile}>
-          <Image source={require('../../assets/profile-photo.png')} style={styles.photo} />
+          <Pressable onPress={pickImage} style={styles.photoWrapper}>
+            <Image source={photo ? { uri: photo } : require('../../assets/profile-photo.png')} style={styles.photo} />
+            <View style={styles.editOverlay}>
+              <Feather name="camera" size={20} color="#FFFFFF" />
+            </View>
+          </Pressable>
+          {photo && (
+            <Pressable style={styles.savePhotoBtn} onPress={savePhoto} accessibilityRole="button" accessibilityLabel="Save photo">
+              <Text style={styles.savePhotoText}>Save Photo</Text>
+            </Pressable>
+          )}
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.phone}>{user.phone}</Text>
           <View style={styles.badge}>
@@ -218,4 +249,8 @@ const styles = StyleSheet.create({
   primaryText: { fontFamily: fonts.semiBold, fontSize: 15, color: '#FFFFFF' },
   logoutBtn: { alignItems: 'center', paddingVertical: 12 },
   logoutText: { fontFamily: fonts.semiBold, fontSize: 15, color: '#EF4444' },
+  photoWrapper: { position: 'relative' },
+  editOverlay: { position: 'absolute', bottom: 0, right: 0, backgroundColor: colors.primary, borderRadius: 16, width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  savePhotoBtn: { marginTop: 8, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: colors.primary, borderRadius: 20 },
+  savePhotoText: { fontFamily: fonts.semiBold, fontSize: 13, color: '#FFFFFF' },
 });
